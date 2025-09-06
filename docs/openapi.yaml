@@ -1,0 +1,42 @@
+openapi: 3.0.0
+info:
+  title: Address API
+  version: 1.0.0
+paths:
+  /address:
+    post:
+      summary: Yeni adres ekle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: MEHMET
+                surname:
+                  type: string
+                  example: PAÇAL
+                email:
+                  type: string
+                  format: email
+                  example: mhmtpccl@gmail.com
+                phone:
+                  type: string
+                  example: +905460012233
+      responses:
+        "200":
+          description: Başarılı
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Adres başarıyla eklendi
