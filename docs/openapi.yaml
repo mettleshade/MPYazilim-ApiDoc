@@ -2,10 +2,31 @@ openapi: 3.0.0
 info:
   title: MPYazilim Frontend API
   version: 1.0.0
+
+components:
+  securitySchemes:
+    bearerAuth:               # 👈 İstediğin isim
+      type: http
+      scheme: bearer
+      bearerFormat: public Token
+    jwtAuth:                # 👈 Buradaki isim
+      type: apiKey
+      in: header
+      name: jwtToken        # 👈 Header key adı
+
+servers:
+  - url: https://apitest.mpyazilim.com/frontend
+    description: Test
+  - url: https://api.hepsimoda.com.tr/frontend
+    description: Hepsi Moda
 paths:
-  /address:
+  /login:
     post:
-      summary: Yeni adres ekle
+      summary: Üye girişi
+      tags:
+        - users
+      security:
+        - bearerAuth: []       # 👈 Bu endpoint jwtToken header ister
       requestBody:
         required: true
         content:
@@ -13,19 +34,16 @@ paths:
             schema:
               type: object
               properties:
-                name:
-                  type: string
-                  example: MEHMET
-                surname:
-                  type: string
-                  example: PAÇAL
                 email:
+                  required: true
                   type: string
-                  format: email
-                  example: mhmtpccl@gmail.com
-                phone:
+                  description: Email
+                  example: mehmet@test.mpyazilim.com
+                pass:
+                  required: true
                   type: string
-                  example: +905460012233
+                  description: md5 pass
+                  example: c4ca4238a0b923820dcc509a6f75849b
       responses:
         "200":
           description: Başarılı
@@ -37,6 +55,454 @@ paths:
                   status:
                     type: boolean
                     example: true
-                  message:
-                    type: string
-                    example: Adres başarıyla eklendi
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                      Id:
+                        type: string
+                        example: "282479"
+                      Isim:
+                        type: string
+                        example: mehmet
+                      Soyisim:
+                        type: string
+                        example: paçakl
+                      Yetki:
+                        type: string
+                        example: "1000"
+                      FiyatGrubu:
+                        type: string
+                        example: "0"
+                      Mail:
+                        type: string
+                        example: mehmet@test.mpyazilim.com
+                      Telefon:
+                        type: string
+                        example: "05467374243"
+                      Tedarikci:
+                        type: integer
+                        example: 0
+                      KomisyoncuOran:
+                        type: integer
+                        example: 0
+                      GoogleAuthenticator:
+                        type: string
+                        example: "0"
+                      GoogleAuthenticatorDurum:
+                        type: string
+                        example: "0"
+                      Secret:
+                        type: string
+                        example: BAXHPGNCBMIDJVFR
+                      Favoriler:
+                        type: array
+                        items:
+                          type: string
+                        example: []
+  /register:
+    post:
+      summary: Üye kayıtı
+      tags:
+        - users
+      security:
+        - jwtAuth: []       # 👈 Bu endpoint jwtToken header ister
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: mehmet@test.mpyazilim.com
+                pass:
+                  type: string
+                  description: MD5 şifrelenmiş parola
+                  example: c4ca4238a0b923820dcc509a6f75849b
+                name:
+                  type: string
+                  example: Mehmet
+                surname:
+                  type: string
+                  example: Paçal
+                phone:
+                  type: string
+                  example: ""
+                uyelik_sozlesmesi:
+                  type: boolean
+                  description: Üyelik sözleşmesi kabul edildi mi?
+                  example: true
+                kampanya_kabul:
+                  type: boolean
+                  description: Kampanya ve tanıtım mailleri kabul edildi mi?
+                  example: true
+              required:
+                - email
+                - pass
+                - name
+                - surname
+                - uyelik_sozlesmesi
+      responses:
+        "200":
+          description: Başarılı
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                      Id:
+                        type: string
+                        example: "282479"
+                      Isim:
+                        type: string
+                        example: mehmet
+                      Soyisim:
+                        type: string
+                        example: paçakl
+                      Yetki:
+                        type: string
+                        example: "1000"
+                      FiyatGrubu:
+                        type: string
+                        example: "0"
+                      Mail:
+                        type: string
+                        example: mehmet@test.mpyazilim.com
+                      Telefon:
+                        type: string
+                        example: "05467374243"
+                      Tedarikci:
+                        type: integer
+                        example: 0
+                      KomisyoncuOran:
+                        type: integer
+                        example: 0
+                      GoogleAuthenticator:
+                        type: string
+                        example: "0"
+                      GoogleAuthenticatorDurum:
+                        type: string
+                        example: "0"
+                      Secret:
+                        type: string
+                        example: BAXHPGNCBMIDJVFR
+                      Favoriler:
+                        type: array
+                        items:
+                          type: string
+                        example: []
+  /users/profile/{id}:
+    get:
+      summary: Üye bilgisi
+      tags:
+        - users > profile
+      security:
+        - jwtAuth: []       # 👈 Bu endpoint jwtToken header ister
+      parameters:
+        - in: path
+          name: id
+      responses:
+        "200":
+          description: Başarılı adres bilgisi yanıtı
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      adresler:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              example: "427142"
+                            siparis_id:
+                              type: string
+                              example: "4"
+                            uye_id:
+                              type: string
+                              example: "282479"
+                            baslik:
+                              type: string
+                              example: "Adres"
+                            il:
+                              type: string
+                              example: "NIGDE"
+                            ilce:
+                              type: string
+                              example: "BOR"
+                            mahalle:
+                              type: string
+                              example: "BAHÇELİ BLD. (CUMHURİYET)"
+                            isim:
+                              type: string
+                              example: "MEHMET"
+                            soyisim:
+                              type: string
+                              example: "PAÇAL"
+                            eposta:
+                              type: string
+                              example: "mhmtpccl@gmail.com"
+                            telefon:
+                              type: string
+                              example: "05467374243"
+                            adres:
+                              type: string
+                              example: "BAHÇELİ KASABASI CUMHURİYET MAHALLESİ NİĞDE-ADANA CADDESİ 1/1 BOR-NİĞDE 51000"
+                            posta_kodu:
+                              type: string
+                              example: "0"
+                            bireysel_kurumsal:
+                              type: string
+                              example: "Bireysel"
+                            tc_kimlik:
+                              type: string
+                              example: ""
+                            firma_adi:
+                              type: string
+                              example: ""
+                            vergidaire:
+                              type: string
+                              example: ""
+                            vergino:
+                              type: string
+                              example: ""
+                            cop_kutusu:
+                              type: string
+                              example: "0"
+                      kuponlar:
+                        type: array
+                        items:
+                          type: string
+                        example: []
+    put:
+      summary: Üye bilgisi güncelleme
+      tags:
+        - users > profile
+      security:
+        - jwtAuth: []       # 👈 Bu endpoint jwtToken header ister
+      parameters:
+        - in: path
+          name: id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isim:
+                  type: string
+                  example: Mehmet
+                soyisim:
+                  type: string
+                  example: Paçal
+                mail:
+                  type: string
+                  format: email
+                  example: mehmet@test.mpyazilim.com
+                telefon:
+                  type: string
+                  example: "+905460012233"
+                cinsiyet:
+                  type: string
+                  enum: [erkek, kadın]
+                  example: erkek
+                mail_izin:
+                  type: boolean
+                  example: true
+                sms_izin:
+                  type: boolean
+                  example: false
+              required:
+                - isim
+                - soyisim
+                - mail
+                - telefon
+                - cinsiyet
+      responses:
+        "200":
+          description: Başarılı güncelleme yanıtı
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+    delete:
+      summary: Üye hesabı silme
+      tags:
+        - users > profile
+      security:
+        - jwtAuth: []       # 👈 Bu endpoint jwtToken header ister
+      parameters:
+        - in: path
+          name: id
+      responses:
+        "200":
+          description: Başarılı silme yanıtı
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+  /users/password:
+    post:
+      summary: Şifre yenileme isteği
+      tags:
+        - users > password
+      security:
+        - jwtAuth: []       # 👈 Bu endpoint jwtToken header ister
+      parameters:
+        - in: path
+          name: id
+      responses:
+        "200":
+          description: Başarılı
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+    put:
+      summary: Üye şifresi güncelleme
+      tags:
+        - users > password
+      security:
+        - jwtAuth: []       # 👈 Bu endpoint jwtToken header ister
+      parameters:
+        - in: path
+          name: id
+      responses:
+        "200":
+          description: Başarılı
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+  /users/address:
+    post:
+      summary: Yeni adres ekle
+      tags:
+        - users > address
+      security:
+        - jwtAuth: []       # 👈 Bu endpoint jwtToken header ister
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Kullanıcı adı
+                  example: MEHMET
+                surname:
+                  type: string
+                  description: Kullanıcı soyadı
+                  example: PAÇAL
+                email:
+                  type: string
+                  format: email
+                  description: E-posta adresi
+                  example: mhmtpccl@gmail.com
+                phone:
+                  type: string
+                  description: Telefon numarası
+                  example: +905460012233
+                title:
+                  type: string
+                  description: Adres başlığı (opsiyonel)
+                  example: EV ADRESİM
+                city:
+                  type: string
+                  description: Şehir
+                  example: NİĞDE
+                district:
+                  type: string
+                  description: İlçe
+                  example: BOR
+                neighbourhood:
+                  type: string
+                  description: Mahalle
+                  example: MERKEZ
+                longAddress:
+                  type: string
+                  description: Tam adres
+                  example: FATİH MAH. ATATÜRK BUL.
+                invoiceType:
+                  type: integer
+                  enum: [0, 1]
+                  description: 0 = Bireysel, 1 = Kurumsal
+                  example: 0
+                tcKimlikNumber:
+                  type: string
+                  description: invoiceType=0 ise zorunlu
+                  example: 36000112233
+                companyName:
+                  type: string
+                  description: invoiceType=1 ise zorunlu
+                  example: ""
+                taxOffice:
+                  type: string
+                  description: invoiceType=1 ise zorunlu
+                  example: ""
+                taxNumber:
+                  type: string
+                  description: invoiceType=1 ise zorunlu
+                  example: ""
+              required:
+                - name
+                - surname
+                - email
+                - phone
+                - city
+                - district
+                - neighbourhood
+                - longAddress
+                - invoiceType
+      responses:
+        "200":
+          description: Başarılı
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
